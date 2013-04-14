@@ -1,0 +1,339 @@
+body {
+	width:100%;
+	height:100%;
+    margin: 0;
+    padding: 0;
+	overflow-x:hidden;
+	background-color:white;
+}
+
+html {
+	height:100%;
+}
+
+#pricePerSqFt {
+	width:40%;
+	height:500px;
+	float:left;
+	margin-left:10px;
+	padding-left:0px;
+}
+
+.title {
+    width: 100%;
+    text-align: center;
+    font: 22pt times;
+	margin-top:0px;
+	background-color:lightgray;
+	margin-bottom:30px;
+	border-bottom:2px solid darkgray;
+    padding:5px;
+}
+.subtitle {
+    width: 100%;
+    text-align: center;
+    margin: 0px 25px 50px 0px;
+    font: 14pt times;
+}
+
+.dimensions {
+	top:64px;
+	position:absolute;
+    width: 35%;
+    background-color: lightgray;
+	float:left;
+	margin-left:30px;
+	padding-top:5px;
+	padding-bottom:5px;
+	text-align:center;
+	border:1px solid black;
+}
+
+#common_controls {
+	border-top:1px solid #D2D4D6;
+	border-bottom:1px solid lightgray;
+	width: 100%;
+	background-color: lightgray;
+	padding-left:0px;
+	margin-top:20px;
+	margin-left:auto;
+	margin-right:auto;
+	position:absolute;
+	top:660px;
+}
+
+@media screen and (min-width:1600px) {
+	#common_controls {
+		top:700px;
+	}
+}
+
+.checkbox {
+    margin-left:15px;
+}
+
+
+#map-canvas { 
+	width:35%;
+	height:500px; 
+	margin-left:30px;
+	float:left;
+	margin-top:52px;
+    border: 1px solid black;
+}
+
+#listingtypes {
+	padding-left:15px;
+	margin-top:10px;
+	margin-bottom:10px;
+	width:15%;
+	float:left;
+}
+
+.invisible {
+	display:none;
+}
+
+#details {
+    float: left;
+    font-size: 16px;
+    margin-left: 52px;
+    margin-top: 10px;
+    text-align: left;
+	position:absolute;
+	left:10%;
+	top:613px;
+}
+
+#presentation {
+    float: left;
+    font-size: 16px;
+    left: 80%;
+    margin-left: 52px;
+    margin-top: 10px;
+    position: absolute;
+    text-align: left;
+    top: 2px;
+	font-weight:bold;
+}
+
+#description {
+    float: left;
+    font-size: 16px;
+    left: 68%;
+    margin-left: 52px;
+    margin-top: 10px;
+    position: absolute;
+    text-align: left;
+    top: 2px;
+	font-weight:bold;
+}
+
+#presentation a,#presentation a:visited {
+	text-decoration:none;
+	color:gray;
+}
+
+#presentation a:hover {
+	color:blue;
+}
+
+#description a,#description a:visited {
+	text-decoration:none;
+	color:gray;
+}
+
+#description a:hover {
+	color:blue;
+}
+
+.label {
+	color:black;
+}
+
+.value {
+	color:blue;
+}	
+
+#houses {
+	margin-top:10px;
+	margin-bottom:10px;
+}
+
+#baths {
+	width:7%;
+	float:left;
+}
+
+#bedrooms {
+	width:7%;
+	float:left;
+	padding-left:20px;
+}
+
+#bedrooms,#baths {
+	margin-top:20px;
+}
+
+#bullet {
+	float:left;
+	width:400px;
+	height:82px;
+	margin-left:30px;
+	margin-top:50px;
+	position:absolute;
+	top:564px;
+	left:43.5%;
+	color:lightgray;
+}
+
+#controls {
+	background-color:lightgray;
+	width:15%;
+	height:50px;
+	float:left;
+}
+
+.actual {
+    background-color: blue;
+    color: grey;
+    width:60px;
+    position: absolute;
+    z-index: 2;
+	text-align:center;
+	margin-left:62px;
+    border: 2px solid black;
+}
+
+.zestimate {
+    background-color: #A6BDDB;
+    color: grey;
+    width:60px;
+	margin-left:124px;
+    position: absolute;
+    vertical-align: bottom;
+	text-align:center;
+    z-index:1;
+    border: 2px solid black;
+}
+
+.max {
+	width:60px;
+	background-color:#ECE7F2;
+	position:absolute;
+	color:gray;
+	vertical-align:text-bottom;
+    padding-bottom: -10px;
+	z-index:0;
+	text-align:center;
+    border: 2px solid black;
+}
+
+code {
+	padding-left:5px;
+}
+
+#bullet_help {
+    color: gray;
+    height: 10px;
+    left: 50%;
+    margin-bottom: 5px;
+    position: absolute;
+    text-align: center;
+    top: 515px;
+    vertical-align: text-top;
+}
+
+#tt {
+	 position:absolute;
+     z-index:4;
+	 display:block;
+	 background:url(../img/tt_left.gif) top left no-repeat;
+ }
+ #tttop {
+	 display:block;
+	 height:5px;
+	 margin-left:5px;
+	 background:url(../img/tt_top.gif) top right no-repeat;
+	 overflow:hidden;
+ }
+ #ttcont {
+	 display:block;
+	 padding:2px 12px 3px 7px;
+	 margin-left:5px;
+	 background:#666;
+	 color:#fff;
+ }
+#ttbot {
+	display:block;
+	height:5px;
+	margin-left:5px;
+	background:url(../img/tt_bottom.gif) top right no-repeat;
+	overflow:hidden;
+}
+
+#sliders {
+	margin-top:20px;
+	width:15%;
+	margin-left:20px;
+	float:left;
+}
+
+#sliders input {
+	padding-left:3px;
+	font-weight:bold;
+}
+
+#amountPrice,#amountSqft,#amountYear {
+	font-weight:normal;
+	border-style:none;
+	width:87px;
+	margin-bottom:10px;
+}
+
+#amountPrice {
+	width:148px;
+}
+
+.year {
+    visibility: hidden;
+}
+
+.slider {
+	width:250px;
+}
+
+#mask,#description_mask {
+	position:absolute;
+	width:100%;
+	height:100%;
+	background-color:#3E62A4;
+	opacity:0.9;
+	top:0px;
+	left:0px;
+	text-align:center;
+	z-index:300;
+	display:none;
+	cursor:pointer;
+}
+
+#description_mask {
+	padding:30px;
+	color:white;
+	font-weight:bold;
+	opacity:1;
+	opacity:0.96;
+}
+
+#project_desc {
+	width:800px;
+	text-align:left;
+}
+
+iframe {
+	text-align:center;
+	margin-top:10%;
+	width:800px;
+	height:600px;
+	border-style:none;
+}
