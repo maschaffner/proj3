@@ -5,6 +5,8 @@ var data_sold = new Array();
 // references which array the user is working with at any moment
 var selected_array = new Array();
 
+var xScale,yScale;
+
 // the sum of all home prices for each zip code in our data set
 var prices = new Array();
 // the count of all home listings for each zip code in our data set
@@ -516,14 +518,13 @@ function createPricePerSqFtScatterplot(data_in) {
 		var circles = svg.selectAll("circle")
 						 .data(data_in)
 						 .enter()
-						 .append("circle")
-						 .transition().duration(1000);
+						 .append("circle");
 		
-        var xScale = d3.scale.linear()
+        xScale = d3.scale.linear()
             .range([0, width])
             .domain([minSqFt,maxSqFt]);
 
-        var yScale = d3.scale.linear()
+        yScale = d3.scale.linear()
             .range([height,0])
             .domain([minPrice,maxPrice]);
 
@@ -536,8 +537,16 @@ function createPricePerSqFtScatterplot(data_in) {
             .scale(yScale)
             .orient("left");
 
+        var downx = Math.NaN;
+        var downscalex;
+
 		svg.append("g")
               .attr("class", "x axis")
+              .on("mousedown", function(d) {
+                var p = d3.mouse(svg[0][0]);
+                downx = xScale.invert(p[0]);
+                downscalex = xScale;
+                })
               .attr("transform", "translate(0," + height + ")")
               .call(xAxis)
             .append("text")
@@ -555,6 +564,19 @@ function createPricePerSqFtScatterplot(data_in) {
               .style("text-anchor", "end")
               .text("Price ($)");
         
+        d3.select('body')
+            .on("mousemove", function(d) {
+              if (!isNaN(downx)) {
+                var p = d3.mouse(svg[0][0]), rupx = p[0];
+                if (rupx != 0) {
+                    xScale.domain([downscalex.domain()[0],  width * (downx - downscalex.domain()[0]) / rupx + downscalex.domain()[0]]);
+                }
+                updateChartScale(data_in);
+              }
+            })
+            .on("mouseup",function(d) { downx=Math.NaN;});
+
+        
         circles
             //tooltip code from: sixrevisions.com 
             .attr("onmousemove",function(d) {return "tooltip.show('" + listingToDetailsString(d)+"');"})
@@ -570,6 +592,26 @@ function createPricePerSqFtScatterplot(data_in) {
 			// fill color of the circles
             .attr("stroke","lightgray")
             .attr("fill","gray");
+}
+
+function updateChartScale(dataIn) {
+    var svg = d3.select("#pricePerSqFt").select("svg");
+    d3.select("#pricePerSqFt").select("g.x.axis")
+        .transition()
+            .call(d3.svg.axis().scale(xScale).orient("bottom").ticks(5));
+    
+    svg
+        .selectAll("circle")
+        .data(dataIn)
+        .transition()
+            .attr("cx",function(d) {return xScale(parseInt(d.sqft))})
+            .attr("cy",function(d) {return yScale(parseInt(d.price))})
+            .attr("r","2");
+            
+    
+    // now set all slider values to match the updated scatterplot ranges
+    $("#slider-range-sqft").slider("values",0,xScale.domain()[0]);
+    $("#slider-range-sqft").slider("values",1,xScale.domain()[1]);
 }
 
 /** updates the chart given a selected data */
