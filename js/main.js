@@ -75,7 +75,7 @@ function getZipPolygonCoords(zip) {
 }
 
 /** filters the data based on selected controls and calls for a "redraw" of the map */
-function filter() {
+function filter(changeChart) {
 	// clear all output arrays
 	clearBuckets();
 
@@ -113,9 +113,10 @@ function filter() {
 		} else if(sold.checked == true){
 		selected_array = data_sold;
 	}
-
-    updateChartData(selected_array);
-
+    if (changeChart) {
+        updateChartData(selected_array);
+    }
+    
 	// populate bedrooms array
 	for(var i in checkboxes) {
 		if(checkboxes[i].className == "bedrooms") { 
@@ -331,7 +332,7 @@ function initialize() {
 		data_sold = d;
 
 		// calls all filters to be applied to newly created map
-		filter(); 		
+		filter(1); 		
 	
 		// calls for map to be drawn, since this is our default option
 		drawMap();
@@ -789,9 +790,13 @@ $(function() {
 	  values: [ 0, 3000 ],
 	  slide: function( event, ui ) {
 		$( "#amountSqft" ).val( ui.values[ 0 ] + " - " + ui.values[ 1 ] + " sq ft" );
-		filter();
+		filter(1);
 	  }
-	});
+	}).bind({
+        slidestart : function(event,ui) {},
+        slidechange : function(event,ui) {$( "#amountSqft" ).val( ui.values[ 0 ] + " - " + ui.values[ 1 ]);filter(0)},
+        slidestop : function(event,ui) {},
+    });
 	$( "#amountSqft" ).val( $( "#slider-range-sqft" ).slider( "values", 0 ) +
 	  " - " + $( "#slider-range-sqft" ).slider( "values", 1 ) + " sq ft");
 });
@@ -805,9 +810,13 @@ $(function() {
 	  values: [ 0, 4000000 ],
 	  slide: function( event, ui ) {
 		$( "#amountPrice" ).val( "$" + ui.values[ 0 ] + " - " + " $" + ui.values[ 1 ]);
-		filter();
+		filter(1);
 	  }
-	});
+	}).bind({
+        slidestart : function(event,ui) {},
+        slidechange : function(event,ui) {$( "#amountPrice" ).val( ui.values[ 0 ] + " - " + ui.values[ 1 ]);filter(0)},
+        slidestop : function(event,ui) {},
+    });
 	$( "#amountPrice" ).val( "$" +  $("#slider-range-price" ).slider( "values", 0 ) +
 	  " - " +" $"+ $( "#slider-range-price" ).slider( "values", 1 ));
 });
@@ -821,7 +830,7 @@ $(function() {
 	  values: [ 1800, 2014 ],
 	  slide: function( event, ui ) {
 		$( "#amountYear" ).val( ui.values[ 0 ] + " - " + ui.values[ 1 ]);
-		filter();
+		filter(1);
 	  }
 	});
 	$( "#amountYear" ).val(  $("#slider-range-year" ).slider( "values", 0 ) +
