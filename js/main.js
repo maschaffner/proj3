@@ -113,9 +113,7 @@ function filter(changeChart) {
 		} else if(sold.checked == true){
 		selected_array = data_sold;
 	}
-    if (changeChart) {
-        updateChartData(selected_array);
-    }
+
     
 	// populate bedrooms array
 	for(var i in checkboxes) {
@@ -137,7 +135,15 @@ function filter(changeChart) {
 
 	// populate output arrays based on filter variables
 	loadBuckets(selected_array,bedrooms,baths,min_sqft,max_sqft,min_year,max_year,min_price,max_price);
-
+    
+    // if the radio button "for sale" or "sold" was toggled, update the scatterplot and timeline
+    // otherwise, just filter the data
+    if (changeChart) {
+        updateChartData(selected_array);
+    }
+    
+    createTimeline(data_sold,min_price,max_price,min_sqft,max_sqft,bedrooms,baths);
+    
 	// clear out details on demand div
 	document.getElementById("details").innerHTML = "";
     
@@ -328,6 +334,13 @@ function initialize() {
 
 	
     d3.csv("data/boston_sold.csv", function(d) {
+
+        // get the dates of sale into a format that Javascript date object recognizes 
+        d.forEach(function(d) {
+            tempArray = d.dateofsale.split("/");
+            d.dateofsale = new Date("20" + tempArray[2], tempArray[0], tempArray[1]);
+        });
+
 		// populate "homes sold" array
 		data_sold = d;
 
@@ -468,6 +481,7 @@ function bulletGraph(zip) {
 	// add animated bars to bullet graph with set parameters
     d3.select("#bullet").selectAll("div").data(price).enter().append("div")
         .attr("class","actual")
+        .style("top","0px")
         .transition().duration(600)
             .style("height",function(d){return d+"px"})
             .style("top",function(d) {return "-"+d+"px"})
@@ -687,6 +701,76 @@ function updateChartZip(zip) {
         .transition().duration()
             .attr("r", function(d) {
                 return d.zip == zip ? 2 : 1});
+}
+
+function createTimeline(soldListings,minPrice,maxPrice,minSqFt,maxSqFt,bedrooms,baths,zipcode) {
+    
+    //filter timeline by the criteria given
+    var i = 0;
+    var filteredSoldListings = [];
+    soldListings.forEach(function(d) {
+        if (zipcode) {
+            if (d.price > minPrice && d.price < maxPrice && d.sqft > minSqFt && d.sqft < maxSqFt && bedrooms.indexOf(String(d.beds))>=0 && baths.indexOf(String(d.baths))>=0 && d.zip = zipcode)
+            { 
+                filteredSoldListings[i] = d;
+                i++;
+            }            
+        }
+        // if we haven't defined a zipcode
+        else {
+            if (d.price > minPrice && d.price < maxPrice && d.sqft > minSqFt && d.sqft < maxSqFt && bedrooms.indexOf(String(d.beds))>=0 && baths.indexOf(String(d.baths))>=0)
+            { 
+            filteredSoldListings[i] = d;
+            i++;
+            }
+        }
+    });
+            
+    // initialize our range of dates, scales, and define that we want weeks 
+    var dateRange = d3.extent(filteredSoldListings, function(d) { return d.dateofsale; });
+    var binner = d3.time.scale();
+    var interval = d3.time.week;
+    var allIntervals = interval.range(interval.floor(dateRange[0]),interval.ceil(dateRange[1]));
+    //console.log("Intervals", allIntervals);
+    
+    //set up the domain and range of this time scale
+    binner
+        .domain([allIntervals[0],allIntervals[allIntervals.length-1]])
+        .range([0,allIntervals.length-1])
+        .interpolate(d3.interpolateRound);
+
+    // create a blank histogram
+    var hist=[];
+    for(var i=0;i<allIntervals.length;i++) hist[i] = new Array(2);
+    for(var i=0;i<allIntervals.length;i++) hist[i][0] = 0;
+    
+    // and populate the histogram
+    filteredSoldListings.forEach(function(d) {
+        var tid=binner(interval.floor(d.dateofsale));
+        if (!hist[tid][0]) {
+            hist[tid][0] = 1;
+            hist[tid][1] = interval.ceil(d.dateofsale);
+        }
+        else {
+            hist[tid][0]++;
+        }
+    });
+    //console.log("Hist:",hist);
+    d3.select("#timeline").selectAll("div")
+        .data(hist)
+        .enter().append("div");
+    d3.select("#timeline").selectAll("div")
+        .attr("top","0px")
+        .style("left",function(d,i) {return String(i*7)+"px"})
+        .style("width","5px")
+        .attr("id","histDiv")
+        .attr("onmousemove",function(d) {return "this.style.top=this.style.top-1;this.style.border='1px solid black';tooltip.show('Week of: " + String(d[1]).substring(0,16) +"<br/>Listings sold: " + d[0]+ "');"})
+        .attr("onmouseout","this.style.border='none';tooltip.hide();")
+        .style("background","darkgray")
+        .transition().duration(1000)
+            .style("height",function(d) {return d[0] + "px"})
+            .style("top",function(d) {return "-" + String(parseInt(d[0]+1)) + "px"});
+
 }
 
 /** returns all the listing details in string form */

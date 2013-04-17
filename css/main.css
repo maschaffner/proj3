@@ -337,3 +337,13 @@ iframe {
 	height:600px;
 	border-style:none;
 }
+
+#timeline {
+    position:relative;
+    top: 600px;
+    border: 1px solid gray;
+}
+
+#histDiv {
+    position: absolute;
+}
