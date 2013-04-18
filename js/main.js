@@ -142,7 +142,8 @@ function filter(changeChart) {
         updateChartData(selected_array);
     }
     
-    createTimeline(data_sold,min_price,max_price,min_sqft,max_sqft,bedrooms,baths);
+    // now create the sales history frequency chart/timeline
+    createTimeline();
     
 	// clear out details on demand div
 	document.getElementById("details").innerHTML = "";
@@ -223,6 +224,9 @@ function selectZipArea(zipArea,zip) {
 
 		//PASS THE ZIP CODE TO SCATTER PLOT BELOW
 		updateChartZip(zip);
+        
+        // recreate the sales history frequency chart
+        createTimeline(zip);
 	}
 }
 
@@ -703,14 +707,43 @@ function updateChartZip(zip) {
                 return d.zip == zip ? 2 : 1});
 }
 
-function createTimeline(soldListings,minPrice,maxPrice,minSqFt,maxSqFt,bedrooms,baths,zipcode) {
+function createTimeline(zipcode) {
+    // first get all filtering from the controls
+    var minSqFt = parseInt($("#slider-range-sqft").slider("values",0));
+    var maxSqFt = parseInt($("#slider-range-sqft").slider("values",1));
+    var minPrice = parseInt($("#slider-range-price").slider("values",0));
+    var maxPrice = parseInt($("#slider-range-price").slider("values",1));
+    var minYear = parseInt($("#slider-range-year").slider("values",0));
+    var maxYear = parseInt($("#slider-range-year").slider("values",1));
+    
+    // get all checkboxes from our controls
+	var checkboxes = document.getElementsByTagName("input");
+    
+    var bedrooms = new Array();
+    var baths = new Array();
+    
+    // populate bedrooms and bathrooms array
+	for(var i in checkboxes) {
+		if(checkboxes[i].className == "bedrooms") { 
+			if(checkboxes[i].checked) {
+				bedrooms.push(checkboxes[i].value);
+			}
+		} else if(checkboxes[i].className == "baths") {
+            if(checkboxes[i].checked) {
+				baths.push(checkboxes[i].value);
+			}
+        }
+	}
+
+    var beginDate = new Date("2010 12 31");
+    var endDate = new Date("2013 04 22");
     
     //filter timeline by the criteria given
     var i = 0;
     var filteredSoldListings = [];
-    soldListings.forEach(function(d) {
+    data_sold.forEach(function(d) {
         if (zipcode) {
-            if (d.price > minPrice && d.price < maxPrice && d.sqft > minSqFt && d.sqft < maxSqFt && bedrooms.indexOf(String(d.beds))>=0 && baths.indexOf(String(d.baths))>=0 && d.zip = zipcode)
+            if (d.price > minPrice && d.price < maxPrice && d.sqft > minSqFt && d.sqft < maxSqFt && bedrooms.indexOf(String(d.beds))>=0 && baths.indexOf(String(d.baths))>=0 && d.zip == zipcode)
             { 
                 filteredSoldListings[i] = d;
                 i++;
@@ -720,14 +753,14 @@ function createTimeline(soldListings,minPrice,maxPrice,minSqFt,maxSqFt,bedrooms,
         else {
             if (d.price > minPrice && d.price < maxPrice && d.sqft > minSqFt && d.sqft < maxSqFt && bedrooms.indexOf(String(d.beds))>=0 && baths.indexOf(String(d.baths))>=0)
             { 
-            filteredSoldListings[i] = d;
-            i++;
+                filteredSoldListings[i] = d;
+                i++;
             }
         }
     });
             
     // initialize our range of dates, scales, and define that we want weeks 
-    var dateRange = d3.extent(filteredSoldListings, function(d) { return d.dateofsale; });
+    var dateRange = [beginDate,endDate];
     var binner = d3.time.scale();
     var interval = d3.time.week;
     var allIntervals = interval.range(interval.floor(dateRange[0]),interval.ceil(dateRange[1]));
@@ -737,7 +770,8 @@ function createTimeline(soldListings,minPrice,maxPrice,minSqFt,maxSqFt,bedrooms,
     binner
         .domain([allIntervals[0],allIntervals[allIntervals.length-1]])
         .range([0,allIntervals.length-1])
-        .interpolate(d3.interpolateRound);
+        .interpolate(d3.interpolateRound)
+        .clamp(true);
 
     // create a blank histogram
     var hist=[];
@@ -749,12 +783,15 @@ function createTimeline(soldListings,minPrice,maxPrice,minSqFt,maxSqFt,bedrooms,
         var tid=binner(interval.floor(d.dateofsale));
         if (!hist[tid][0]) {
             hist[tid][0] = 1;
-            hist[tid][1] = interval.ceil(d.dateofsale);
+            hist[tid][1] = interval.floor(d.dateofsale);
         }
         else {
             hist[tid][0]++;
         }
     });
+    
+    
+    
     //console.log("Hist:",hist);
     d3.select("#timeline").selectAll("div")
         .data(hist)
