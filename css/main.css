@@ -344,6 +344,12 @@ iframe {
     border: 1px solid gray;
 }
 
-#histDiv {
+.histDiv {
     position: absolute;
+    background: darkgray;
+}
+
+.zipdiv {
+    position: absolute;
+    background: blue;
 }

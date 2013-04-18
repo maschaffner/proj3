@@ -790,23 +790,37 @@ function createTimeline(zipcode) {
         }
     });
     
-    
-    
-    //console.log("Hist:",hist);
-    d3.select("#timeline").selectAll("div")
-        .data(hist)
-        .enter().append("div");
-    d3.select("#timeline").selectAll("div")
-        .attr("top","0px")
-        .style("left",function(d,i) {return String(i*7)+"px"})
-        .style("width","5px")
-        .attr("id","histDiv")
-        .attr("onmousemove",function(d) {return "this.style.top=this.style.top-1;this.style.border='1px solid black';tooltip.show('Week of: " + String(d[1]).substring(0,16) +"<br/>Listings sold: " + d[0]+ "');"})
-        .attr("onmouseout","this.style.border='none';tooltip.hide();")
-        .style("background","darkgray")
-        .transition().duration(1000)
-            .style("height",function(d) {return d[0] + "px"})
-            .style("top",function(d) {return "-" + String(parseInt(d[0]+1)) + "px"});
+    if (!zipcode) {
+        d3.select("#timeline").selectAll("div").remove();
+        //console.log("Hist:",hist);
+        d3.select("#timeline").selectAll("div")
+            .data(hist)
+            .enter().append("div");
+        d3.select("#timeline").selectAll("div")
+            .attr("top","0px")
+            .style("left",function(d,i) {return String(i*7)+"px"})
+            .style("width","5px")
+            .attr("class","histDiv")
+            .attr("onmousemove",function(d) {return "this.style.top=this.style.top-1;this.style.border='1px solid black';tooltip.show('Week of: " + String(d[1]).substring(0,16) +"<br/>Listings sold: " + d[0]+ "');"})
+            .attr("onmouseout","this.style.border='none';tooltip.hide();")
+            .transition().duration(1000)
+                .style("height",function(d) {return d[0] + "px"})
+                .style("top",function(d) {return "-" + String(parseInt(d[0]+1)) + "px"});
+    } else {
+        d3.select("#timeline").selectAll("div.zipdiv")
+            .data(hist)
+            .enter().append("div")
+            .attr("class","zipdiv");
+        d3.select("#timeline").selectAll("div.zipdiv")
+            .attr("top","0px")
+            .style("left",function(d,i) {return String(i*7)+"px"})
+            .style("width","5px")
+            .attr("onmousemove",function(d) {return "this.style.top=this.style.top-1;this.style.border='1px solid black';tooltip.show('Week of: " + String(d[1]).substring(0,16) +"<br/>Listings sold: " + d[0]+ "');"})
+            .attr("onmouseout","this.style.border='none';tooltip.hide();")
+            .transition().duration(1000)
+                .style("height",function(d) {return d[0] + "px"})
+                .style("top",function(d) {return "-" + String(parseInt(d[0]+1)) + "px"});
+    }
 
 }
 
