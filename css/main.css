@@ -340,16 +340,37 @@ iframe {
 
 #timeline {
     position:relative;
-    top: 600px;
-    border: 1px solid gray;
+    left: 25px;
+    top: 700px;
+    width: 843px;
+}
+
+#timelineLabel {
+    position:absolute;
+    left: 25px;
+    top: 700px;
+    width: 815px;
+    height: 65px;
+    background: white;
+    font: 18pt arial;
+    padding: 15px;
+    border: 1px solid darkgray;
 }
 
 .histDiv {
     position: absolute;
-    background: darkgray;
+    background: #AACCAA;
+    border:2px solid #448844;
+}
+
+.dateLabel {
+    position:absolute;
+    border-left: 1px solid black;
+    padding-top: 5px;
 }
 
 .zipdiv {
     position: absolute;
     background: blue;
+    border: 1px solid lightblue;
 }

@@ -5,7 +5,7 @@ var data_sold = new Array();
 // references which array the user is working with at any moment
 var selected_array = new Array();
 
-var xScale,yScale;
+var xScale,yScale,currentZip=0;
 
 // the sum of all home prices for each zip code in our data set
 var prices = new Array();
@@ -143,7 +143,7 @@ function filter(changeChart) {
     }
     
     // now create the sales history frequency chart/timeline
-    createTimeline();
+    createTimeline(currentZip);
     
 	// clear out details on demand div
 	document.getElementById("details").innerHTML = "";
@@ -227,6 +227,7 @@ function selectZipArea(zipArea,zip) {
         
         // recreate the sales history frequency chart
         createTimeline(zip);
+        currentZip=zip;
 	}
 }
 
@@ -741,22 +742,21 @@ function createTimeline(zipcode) {
     //filter timeline by the criteria given
     var i = 0;
     var filteredSoldListings = [];
+    var j = 0;
+    var filteredZipSoldListings = [];
+    
     data_sold.forEach(function(d) {
-        if (zipcode) {
-            if (d.price > minPrice && d.price < maxPrice && d.sqft > minSqFt && d.sqft < maxSqFt && bedrooms.indexOf(String(d.beds))>=0 && baths.indexOf(String(d.baths))>=0 && d.zip == zipcode)
-            { 
-                filteredSoldListings[i] = d;
-                i++;
-            }            
-        }
-        // if we haven't defined a zipcode
-        else {
             if (d.price > minPrice && d.price < maxPrice && d.sqft > minSqFt && d.sqft < maxSqFt && bedrooms.indexOf(String(d.beds))>=0 && baths.indexOf(String(d.baths))>=0)
             { 
                 filteredSoldListings[i] = d;
                 i++;
             }
-        }
+            // prepare the zip histogram (if no zip, it will consist of all 0's)
+            if (d.price > minPrice && d.price < maxPrice && d.sqft > minSqFt && d.sqft < maxSqFt && bedrooms.indexOf(String(d.beds))>=0 && baths.indexOf(String(d.baths))>=0 && d.zip == zipcode)
+                { 
+                    filteredZipSoldListings[j] = d;
+                    j++;
+                }            
     });
             
     // initialize our range of dates, scales, and define that we want weeks 
@@ -777,8 +777,13 @@ function createTimeline(zipcode) {
     var hist=[];
     for(var i=0;i<allIntervals.length;i++) hist[i] = new Array(2);
     for(var i=0;i<allIntervals.length;i++) hist[i][0] = 0;
+
+    // create a blank histogram for the Zipcode
+    var histZip=[];
+    for(var i=0;i<allIntervals.length;i++) histZip[i] = new Array(2);
+    for(var i=0;i<allIntervals.length;i++) histZip[i][0] = 0;
     
-    // and populate the histogram
+    // then populate the histogram
     filteredSoldListings.forEach(function(d) {
         var tid=binner(interval.floor(d.dateofsale));
         if (!hist[tid][0]) {
@@ -790,38 +795,54 @@ function createTimeline(zipcode) {
         }
     });
     
-    if (!zipcode) {
-        d3.select("#timeline").selectAll("div").remove();
-        //console.log("Hist:",hist);
-        d3.select("#timeline").selectAll("div")
-            .data(hist)
-            .enter().append("div");
-        d3.select("#timeline").selectAll("div")
+    // then populate the zip histogram
+    filteredZipSoldListings.forEach(function(d) {
+        var tid=binner(interval.floor(d.dateofsale));
+        if (!histZip[tid][0]) {
+            histZip[tid][0] = 1;
+            histZip[tid][1] = interval.floor(d.dateofsale);
+        }
+        else {
+            histZip[tid][0]++;
+        }
+    });
+    
+    // first build/update the regular frequency chart
+        d3.select("#timeline").selectAll("div.histDiv")
+            .data(hist.slice(1))
+            .enter().append("div")
+                .attr("class","histDiv");
+        d3.select("#timeline").selectAll("div.histDiv")
             .attr("top","0px")
             .style("left",function(d,i) {return String(i*7)+"px"})
             .style("width","5px")
-            .attr("class","histDiv")
-            .attr("onmousemove",function(d) {return "this.style.top=this.style.top-1;this.style.border='1px solid black';tooltip.show('Week of: " + String(d[1]).substring(0,16) +"<br/>Listings sold: " + d[0]+ "');"})
-            .attr("onmouseout","this.style.border='none';tooltip.hide();")
+            .attr("onmousemove",function(d,i) {return "this.style.top='-" + String(parseInt(d[0]+5)) + "px';tooltip.show('Week of: " + String(d[1]).substring(0,16) +"<br/>Listings sold: " + d[0]+ "');"})
+            .attr("onmouseout",function(d,i) {return "this.style.top='-" + String(parseInt(d[0])) + "px';tooltip.hide();"})
+            .html(function(d,i) {if (i%13==0) {
+                    return "<div class='dateLabel' style='top:"+ d[0] +"px;'>" + String(d[1]).substring(4,7) + String(d[1]).substring(10,16) + "</div>";
+                    }
+                })
             .transition().duration(1000)
                 .style("height",function(d) {return d[0] + "px"})
-                .style("top",function(d) {return "-" + String(parseInt(d[0]+1)) + "px"});
-    } else {
+                .style("top",function(d) {return "-" + String(parseInt(d[0])) + "px"});
+
+    // then build/update the zipcode if it
         d3.select("#timeline").selectAll("div.zipdiv")
-            .data(hist)
+            .data(histZip.slice(1))
             .enter().append("div")
             .attr("class","zipdiv");
         d3.select("#timeline").selectAll("div.zipdiv")
             .attr("top","0px")
             .style("left",function(d,i) {return String(i*7)+"px"})
             .style("width","5px")
-            .attr("onmousemove",function(d) {return "this.style.top=this.style.top-1;this.style.border='1px solid black';tooltip.show('Week of: " + String(d[1]).substring(0,16) +"<br/>Listings sold: " + d[0]+ "');"})
-            .attr("onmouseout","this.style.border='none';tooltip.hide();")
+            .style("z-index",function(d) {return d[0]>1 ? "10" : "-1"})
+            .attr("onmousemove",function(d) {return "tooltip.show('Week of: " + String(d[1]).substring(0,16) +"<br/>Listings sold: " + d[0]+ "');"})
+            .attr("onmouseout","tooltip.hide();")
             .transition().duration(1000)
                 .style("height",function(d) {return d[0] + "px"})
-                .style("top",function(d) {return "-" + String(parseInt(d[0]+1)) + "px"});
-    }
-
+                .style("top",function(d) {return "-" + String(parseInt(d[0])) + "px"});
+        allZips = d3.select("#timeline").selectAll("div.zipdiv");
+            
 }
 
 /** returns all the listing details in string form */
