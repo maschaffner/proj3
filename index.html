@@ -710,27 +710,53 @@
 			
 		]
 		</textarea>
-      <div class="content">
+        <div id="wrapper">
+        <div id="controls">
+        <div id="controlsTitle">Filter by:</div>
+		<div id="listingtypes">
+			<input id="forsale" onclick="filter(2)" type="radio" name="listing_type" checked />For Sale 
+			<input id="sold" onclick="filter(2)" type="radio" name="listing_type" />Sold
+		</div>
+
+		<div id="bedrooms">
+			<div>Bedrooms</div>
+			<input type="checkbox" class="bedrooms" onclick="filter(1)" value="1" checked>1<br />
+			<input type="checkbox" class="bedrooms" onclick="filter(1)"  value="2" checked>2<br />
+			<input type="checkbox" class="bedrooms" onclick="filter(1)" value="3" checked>3<br />
+			<input type="checkbox" class="bedrooms" onclick="filter(1)" value="4" checked>4<br />
+			<input type="checkbox" class="bedrooms" onclick="filter(1)" value="5+" checked>5+<br />
+		</div>
+		
+		<div id="baths">
+			<div>Baths</div>
+			<input type="checkbox" class="baths" onclick="filter(1)" value="1" checked>1<br />
+			<input type="checkbox" class="baths" onclick="filter(1)"  value="2" checked>2<br />
+			<input type="checkbox" class="baths" onclick="filter(1)" value="3" checked>3<br />
+			<input type="checkbox" class="baths" onclick="filter(1)" value="4" checked>4<br />
+			<input type="checkbox" class="baths" onclick="filter(1)" value="5+" checked>5+<br />
+		</div>
+		<div id="sliders2">
+			<span style="background:white">Square Footage: <input type="text" id="amountSqft" /></span>
+			<div id="slider-range-sqft" class="slider"></div>
+			<span style="background:white">Price: <input style="margin-top:30px;" type="text" id="amountPrice" /></span>
+			<div id="slider-range-price" class="slider"></div>
+		</div>
+     </div>
+     <div id="content">
         <!--This title is an example only; we can brainstorm a new one.-->
         <div class="title">Discover Boston: with<span class="subtitle"> <code>zillow.com</code></span></div>
-       	
+        <div id="toggleFilters" onclick="toggleFilters();">Show Filters</div>
+        <!-- placeholder for the price/sq ft scatterplot --> 
+        <div class="scatterplot" id="pricePerSqFt"></div>
 		<!-- placeholder for our google map -->
-        <div id="map-canvas"></div>		
-        <div class="largeView">
-            <div class="scatterplot" id="pricePerSqFt"></div>
-            <div class="histogram" id="yAxisHistogram"></div>
-            <div class="histogram" id="xAxisHistogram"></div>
-        </div><br />
         <div class="dimensions">
             <div id="houses">
-                Color zipcodes by: 
+                Color by: 
 				<input onclick="clearPolygons();layPolygons()" id="count" type="radio" name="type" />Number of listings 
 				<input onclick="clearPolygons();layPolygons()" id="average" type="radio" name="type" checked />Average price
             </div>
 		</div>
-
-		<!-- placeholder for details on demand -->
-        <div id="details"></div>
+        <div id="map-canvas"></div>
 		
 		<!-- loads our video presentation -->
 		<div id="presentation"><a href="#" onclick="toggleVideo()">[ PRESENTATION ]</a></div>
@@ -738,90 +764,17 @@
 		<!-- shows our project presentation -->
 		<div id="description"><a href="#" onclick="toggleDescription()">[ DESCRIPTION ]</a></div>
 		
-		<div id="bullet_help">[ PLEASE SELECT A ZIP CODE BUBBLE FOR DETAILS ]</div>
-		
-		<!-- placeholder for bullet graph -->
-        <div id="bullet"></div>
-		
-		<!--
-		<div id="common_controls">
+		<!-- placeholder for bar chart -->
+        <div id="bar"></div>
+				
+		<!-- placeholder for zip code info -->
+        <div id="details"><div id="detailsBoston"></div><div id="detailsZip"></div><div id="bar_help">[ PLEASE SELECT A ZIP CODE FOR DETAILS ]</div></div>
 
-			<div id="listingtypes">
-				<input id="forsale" onclick="filter()" type="radio" name="listing_type" checked />For Sale 
-				<input id="sold" onclick="filter()" type="radio" name="listing_type" />Sold
-			</div>	
+        <div id="timelineLabel"><span style="margin-left:40px">Weekly Number Sold</span>
+	    <div id="timeline"></div></div>
 
-            <div id="bedrooms">
-                <div>Bedrooms</div>
-                <input type="checkbox" class="bedrooms" onclick="filter()" value="1" checked>1
-                <input type="checkbox" class="bedrooms" onclick="filter()"  value="2" checked>2
-                <input type="checkbox" class="bedrooms" onclick="filter()" value="3" checked>3
-                <input type="checkbox" class="bedrooms" onclick="filter()" value="4" checked>4
-                <input type="checkbox" class="bedrooms" onclick="filter()" value="5+" checked>5+
-            </div>
-
-            <div id="baths">
-                <div>Baths</div>
-                <input type="checkbox" class="baths" onclick="filter()" value="1" checked>1
-                <input type="checkbox" class="baths" onclick="filter()"  value="2" checked>2
-                <input type="checkbox" class="baths" onclick="filter()" value="3" checked>3
-                <input type="checkbox" class="baths" onclick="filter()" value="4" checked>4
-                <input type="checkbox" class="baths" onclick="filter()" value="5+" checked>5+
-            </div>
-
-            <table id="sliders">
-                <tr>
-					<td><label for="amountSqft">Square Footage:</label><input type="text" id="amountSqft" /></td>
-					<td><label for="amountPrice">Price:</label><input type="text" id="amountPrice" /></td>
-					<td class="year"><label for="amountYear">Year:</label><input type="text" id="amountYear" /></td>
-				</tr>
-                
-				<tr>
-					<td><div id="slider-range-sqft" class="slider"></div></td>
-					<td><div id="slider-range-price" class="slider"></div></td>
-					<td class="year"><div id="slider-range-year" class="slider"></div></td>
-				</tr>
-            </table>
-        </div>
-		-->
-
-		<!-- placeholder for scatterplot -->
-        <div class="barChart" id="pricePerZip"></div>
-       
-
-		<div id="listingtypes">
-			<input id="forsale" onclick="filter()" type="radio" name="listing_type" checked />For Sale 
-			<input id="sold" onclick="filter()" type="radio" name="listing_type" />Sold
-		</div>
-
-		<div id="bedrooms">
-			<div>Bedrooms</div>
-			<input type="checkbox" class="bedrooms" onclick="filter()" value="1" checked>1<br />
-			<input type="checkbox" class="bedrooms" onclick="filter()"  value="2" checked>2<br />
-			<input type="checkbox" class="bedrooms" onclick="filter()" value="3" checked>3<br />
-			<input type="checkbox" class="bedrooms" onclick="filter()" value="4" checked>4<br />
-			<input type="checkbox" class="bedrooms" onclick="filter()" value="5+" checked>5+<br />
-		</div>
-		
-		<div id="baths">
-			<div>Baths</div>
-			<input type="checkbox" class="baths" onclick="filter()" value="1" checked>1<br />
-			<input type="checkbox" class="baths" onclick="filter()"  value="2" checked>2<br />
-			<input type="checkbox" class="baths" onclick="filter()" value="3" checked>3<br />
-			<input type="checkbox" class="baths" onclick="filter()" value="4" checked>4<br />
-			<input type="checkbox" class="baths" onclick="filter()" value="5+" checked>5+<br />
-		</div>
-		
-		<div id="sliders">
-			Square Footage <input type="text" id="amountSqft" />
-			<div id="slider-range-sqft" class="slider"></div>
-			Price <input style="margin-top:30px;" type="text" id="amountPrice" />
-			<div id="slider-range-price" class="slider"></div>
-		</div>
-        <div id="timelineLabel">Boston Historical Sales</div>
-        <div id="timeline"></div>
-	    <script src="js/main.js"></script>
-    </div>
+        <script src="js/main.js"></script>
+    </div></div>
 	<div id="mask" onclick="toggleVideo()">
 		<iframe src="http://www.youtube.com/embed/hOifES3byfk"></iframe>
 	</div>

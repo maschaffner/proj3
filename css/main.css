@@ -1,46 +1,161 @@
+html {
+
+    background-color: rgb(197,234,223); /* Old browsers */
+background: -moz-linear-gradient(top,  rgba(197,234,223,1) 2%, rgba(255,224,253,1) 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(2%,rgba(197,234,223,1)), color-stop(100%,rgba(255,224,253,1))); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top,  rgba(197,234,223,1) 2%,rgba(255,224,253,1) 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top,  rgba(197,234,223,1) 2%,rgba(255,224,253,1) 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top,  rgba(197,234,223,1) 2%,rgba(255,224,253,1) 100%); /* IE10+ */
+background: linear-gradient(to bottom,  rgba(197,234,223,1) 2%,rgba(255,224,253,1) 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#c5eadf', endColorstr='#ffe0fd',GradientType=0 ); /* IE6-9 */
+
+}
+
 body {
-	width:100%;
-	height:100%;
+    background: url(../img/boston_skyline.jpg);
+    width:100%;
+    height:936px;
     margin: 0;
     padding: 0;
-	overflow-x:hidden;
-	background-color:white;
+    overflow-x:hidden;
+    font-family: calibri;
 }
 
-html {
-	height:100%;
-}
 
-#pricePerSqFt {
-	width:40%;
-	height:500px;
-	float:left;
-	margin-left:10px;
-	padding-left:0px;
+#wrapper {
+    position:absolute;
+    width: 100%;
+    height:936px;
+    margin-right: auto;
+    margin-left: auto;
+    background-color: rgba(255,255,255,0.6)
 }
 
 .title {
     width: 100%;
     text-align: center;
-    font: 22pt times;
+    font: 32pt times;
 	margin-top:0px;
-	background-color:lightgray;
-	margin-bottom:30px;
+	background-color: #3D6A8E;
 	border-bottom:2px solid darkgray;
-    padding:5px;
+    padding-top: 15px;
+    height: 55px;
+    color: white;
 }
+
+#toggleFilters {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 0px;
+    margin-bottom: 10px;
+    height: 20px;
+    width: 100px;
+    background:lightgray;
+    border: 2px solid darkgray;
+    border-top: none;    
+    font: 14pt arial bold;
+    padding:1px;
+    z-index:110;
+    cursor: hand;
+    cursor: pointer;
+}
+
+#controls {
+    position: absolute;
+    margin-top: 100px;
+    border: 1px solid black;
+    width:300px;
+    height:400px;
+    left: 30%;
+    top:30%;
+    background-color: rgba(220,220,220,0.7);
+    box-shadow: 10px 10px 5px rgba(100,100,100,0.4);
+    display:none;
+    z-index:150;
+}
+
+#controls #controlsTitle {
+    font: 13pt arial;
+    padding:10px;
+    margin:5px;
+    width:90%;
+    border: 1px solid darkgray;
+    background: #3D6A8E;
+    color: white;
+}
+
+#content {
+    z-index:101;
+    position:relative;
+    background: white;
+    width: 980px;
+    height: 900px;
+    border: 1px solid black;
+    margin-left: auto;
+    margin-right:auto;
+}
+
+
+#sliders2 {
+    clear: both;
+	padding-top:20px;
+    margin-left:20px;
+    padding-left:3px;
+	font-weight:bold;
+}
+
+.slider {
+    clear:both;
+	width:250px;
+}
+
+
+#bedrooms, #baths {
+	float:left;
+    padding-left:20px;
+    margin-top:20px;
+}
+
+#listingtypes {
+	padding-left:45px;
+	margin-top:10px;
+	margin-bottom:10px;
+}
+
+#amountPrice,#amountSqft,#amountYear {
+	font-weight:normal;
+	border-style:none;
+	width:87px;
+	margin-bottom:10px;
+}
+
+#amountPrice {
+	width:148px;
+}
+
+.year {
+    visibility: hidden;
+}
+
+
+#pricePerSqFt {
+    float:right;
+    margin-right: 35px;
+    width:55%;
+}
+
+
 .subtitle {
     width: 100%;
     text-align: center;
     margin: 0px 25px 50px 0px;
-    font: 14pt times;
+    font: 20pt times;
 }
 
 .dimensions {
-	top:64px;
-	position:absolute;
+    height:42px;
     width: 35%;
-    background-color: lightgray;
+    background-color: #EBEBE1;
 	float:left;
 	margin-left:30px;
 	padding-top:5px;
@@ -49,45 +164,21 @@ html {
 	border:1px solid black;
 }
 
-#common_controls {
-	border-top:1px solid #D2D4D6;
-	border-bottom:1px solid lightgray;
-	width: 100%;
-	background-color: lightgray;
-	padding-left:0px;
-	margin-top:20px;
-	margin-left:auto;
-	margin-right:auto;
-	position:absolute;
-	top:660px;
-}
-
 @media screen and (min-width:1600px) {
 	#common_controls {
 		top:700px;
 	}
 }
 
-.checkbox {
-    margin-left:15px;
-}
-
 
 #map-canvas { 
+    float:left;
+    clear:left;
 	width:35%;
 	height:500px; 
 	margin-left:30px;
-	float:left;
-	margin-top:52px;
+	margin-top:-1px;
     border: 1px solid black;
-}
-
-#listingtypes {
-	padding-left:15px;
-	margin-top:10px;
-	margin-bottom:10px;
-	width:15%;
-	float:left;
 }
 
 .invisible {
@@ -95,14 +186,18 @@ html {
 }
 
 #details {
-    float: left;
+    float: right;
     font-size: 16px;
-    margin-left: 52px;
-    margin-top: 10px;
-    text-align: left;
-	position:absolute;
-	left:10%;
-	top:613px;
+    text-align: center;
+    margin-right: 15px;
+    margin-top:40px;
+    margin-bottom: 20px;
+    height: 210px;
+    width: 250px;
+}
+
+#detailsZip {
+    margin-top:50px;
 }
 
 #presentation {
@@ -149,10 +244,17 @@ html {
 
 .label {
 	color:black;
+    font-weight:bold;
+}
+
+.valueBoston {
+    color: #35978F;
+    font-weight: bold;
 }
 
 .value {
-	color:blue;
+	color:#BF812D;
+    font-weight: bold;
 }	
 
 #houses {
@@ -160,93 +262,74 @@ html {
 	margin-bottom:10px;
 }
 
-#baths {
-	width:7%;
-	float:left;
-}
-
-#bedrooms {
-	width:7%;
-	float:left;
-	padding-left:20px;
-}
-
-#bedrooms,#baths {
-	margin-top:20px;
-}
-
-#bullet {
-	float:left;
-	width:400px;
-	height:82px;
-	margin-left:30px;
-	margin-top:50px;
-	position:absolute;
-	top:564px;
-	left:43.5%;
+#bar {
+	width:300px;
+    float:right;
+    clear:right;
 	color:lightgray;
+    position:relative;
+    margin-top: 30px;
+    margin-right: 25px;
+    height:220px;
 }
 
-#controls {
-	background-color:lightgray;
-	width:15%;
-	height:50px;
-	float:left;
-}
 
-.actual {
-    background-color: blue;
-    color: grey;
-    width:60px;
-    position: absolute;
-    z-index: 2;
-	text-align:center;
-	margin-left:62px;
-    border: 2px solid black;
-}
-
-.zestimate {
-    background-color: #A6BDDB;
-    color: grey;
-    width:60px;
-	margin-left:124px;
-    position: absolute;
-    vertical-align: bottom;
-	text-align:center;
-    z-index:1;
-    border: 2px solid black;
-}
-
-.max {
+.avg_boston, .avg_zestimate {
 	width:60px;
-	background-color:#ECE7F2;
+	background-color:#35978F;
 	position:absolute;
 	color:gray;
 	vertical-align:text-bottom;
-    padding-bottom: -10px;
 	z-index:0;
 	text-align:center;
-    border: 2px solid black;
+    border: 3px solid black;
+}
+.avg_zestimate {
+	margin-left:151px;
+}
+
+.avg_zip, .avg_zestimate_zip {
+	width:60px;
+	background-color:#BF812D;
+	position:absolute;
+	color:gray;
+	vertical-align:text-bottom;
+    z-index:0;
+	text-align:center;
+    border: 3px solid black;
+
+}
+.avg_zip {
+	margin-left:61px;
+}
+.avg_zestimate_zip {
+	margin-left:212px;
+}
+
+#currentMaxBar {
+    border-bottom:1px solid black;
+    width:175px;
+    margin-left: auto;
+    margin-right: auto;
+    position:relative;
+    text-align:center;
+    font-weight: bold;
+    color:black;
 }
 
 code {
 	padding-left:5px;
 }
 
-#bullet_help {
+#bar_help {
     color: gray;
-    height: 10px;
-    left: 50%;
-    margin-bottom: 5px;
-    position: absolute;
+    margin-top: 100px;
     text-align: center;
-    top: 515px;
-    vertical-align: text-top;
 }
 
 #tt {
 	 position:absolute;
-     z-index:4;
+     z-index:114;
 	 display:block;
 	 background:url(../img/tt_left.gif) top left no-repeat;
  }
@@ -270,37 +353,6 @@ code {
 	margin-left:5px;
 	background:url(../img/tt_bottom.gif) top right no-repeat;
 	overflow:hidden;
-}
-
-#sliders {
-	margin-top:20px;
-	width:15%;
-	margin-left:20px;
-	float:left;
-}
-
-#sliders input {
-	padding-left:3px;
-	font-weight:bold;
-}
-
-#amountPrice,#amountSqft,#amountYear {
-	font-weight:normal;
-	border-style:none;
-	width:87px;
-	margin-bottom:10px;
-}
-
-#amountPrice {
-	width:148px;
-}
-
-.year {
-    visibility: hidden;
-}
-
-.slider {
-	width:250px;
 }
 
 #mask,#description_mask {
@@ -338,39 +390,54 @@ iframe {
 	border-style:none;
 }
 
-#timeline {
+#timelineLabel {
+    clear:both;
     position:relative;
-    left: 25px;
-    top: 700px;
+    width: 843px;
+    height: 90px;
+    margin-left: auto;
+    margin-right: auto;
+    background: white;
+    font: 16pt arial;
+    border: 1px solid darkgray;
+    padding:10px;
+}
+
+#timeline {
+    position:absolute;
+    left: 10px;
+    top: 107px;
     width: 843px;
 }
 
-#timelineLabel {
-    position:absolute;
-    left: 25px;
-    top: 700px;
-    width: 815px;
-    height: 65px;
-    background: white;
-    font: 18pt arial;
-    padding: 15px;
-    border: 1px solid darkgray;
+.chartjunkDiv {
+     position:absolute;
+     width: 843px;
+     border-bottom: 1px solid lightgray;
+     text-align: left;
+     font:10pt arial;
+     z-index: 100;
 }
 
 .histDiv {
     position: absolute;
-    background: #AACCAA;
-    border:2px solid #448844;
+    background: #35978F;
+    border:2px solid black;
+    z-index:101;
 }
 
 .dateLabel {
     position:absolute;
     border-left: 1px solid black;
     padding-top: 5px;
+    font: 14pt calibri;
 }
 
 .zipdiv {
     position: absolute;
-    background: blue;
-    border: 1px solid lightblue;
+    background: #BF812D;
+    border: 1px solid #600;
+}
+#divHover {
+    background: #01665E;
 }

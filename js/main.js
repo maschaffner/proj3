@@ -36,6 +36,19 @@ var colors = new Array();
 // tracks polygon colors
 var polygon_colors = new Array();
 
+$(function() {
+    $( "#controls" ).draggable();
+});
+
+function toggleFilters() {
+	$("#controls").toggle();
+    if (d3.select("#toggleFilters").text != "Hide Filters") {
+        $("#toggleFilters").text = "Hide Filters";
+    } else {
+        $("#toggleFilters").text = "Show Filters";
+    }
+}
+
 /** creates the google map and calls for the polygons to be created */
 function drawMap() {
 	// center of map
@@ -138,18 +151,27 @@ function filter(changeChart) {
     
     // if the radio button "for sale" or "sold" was toggled, update the scatterplot and timeline
     // otherwise, just filter the data
-    if (changeChart) {
+    if (changeChart==1) {
+        updateChartData(selected_array);
+    }
+    else if (changeChart==2) {
+        // recreate scatterplot
+        createPricePerSqFtScatterplot(selected_array);
         updateChartData(selected_array);
     }
     
     // now create the sales history frequency chart/timeline
     createTimeline(currentZip);
     
-	// clear out details on demand div
-	document.getElementById("details").innerHTML = "";
+	
+    if (changeChart==2) {
+        // clear out details on demand div
+        document.getElementById("detailsZip").innerHTML = "";
+        d3.select("#bar_help").text("[ PLEASE SELECT A ZIP CODE FOR DETAILS ]");
     
-    // clear out bullet graph
-	clearBulletGraph();
+        // clear out bullet graph
+        clearBarChart();
+    }
 	
 	// if map is loaded, redraw polygons
 	if(map) {
@@ -159,14 +181,13 @@ function filter(changeChart) {
 }
 
 /** clears out bullet graph */
-function clearBulletGraph() {
-	document.getElementById("bullet").innerHTML = "";
+function clearBarChart() {
+	document.getElementById("bar").innerHTML = "";
 }	
 
 /** draws the polygons onto the google map */
 function layPolygons() {
-	// clear out bullet graph
-	clearBulletGraph();
+
 	for (var i in zips_coords) {
 			// zip area polygon coordinates
 			var zipCoords = getZipPolygonCoords(zips_coords[i].zip);
@@ -178,7 +199,7 @@ function layPolygons() {
 				strokeOpacity: 0.8,
 				strokeWeight: 2,
 				fillColor: getFillColor(zips_coords[i].zip),
-				fillOpacity: 0.35
+				fillOpacity: 0.6
 			  });
 			  
 			zipArea.setMap(map);
@@ -211,7 +232,7 @@ function selectZipArea(zipArea,zip) {
 		zipArea.setMap(null);
 		
 		// change the color of the select zip code area
-		zipArea.fillColor = "blue";
+		zipArea.fillColor = "BF812D";
 		
 		// put the zip code polygon back on the map
 		zipArea.setMap(map);
@@ -219,8 +240,8 @@ function selectZipArea(zipArea,zip) {
 		// output details on demand in designated div
 		showDetails(zip);
 		
-		// create bullet graph
-		bulletGraph(zip);
+		// create bars
+		barChart(zip);
 
 		//PASS THE ZIP CODE TO SCATTER PLOT BELOW
 		updateChartZip(zip);
@@ -233,7 +254,7 @@ function selectZipArea(zipArea,zip) {
 
 /** loads the details of the zip code into the designated div */
 function showDetails(zip) {
-	document.getElementById("details").innerHTML = getDetails(zip);
+	document.getElementById("detailsZip").innerHTML = getDetails(zip);
 }
 
 /** gets the name of the zip locale */
@@ -255,7 +276,7 @@ function withCommas(x) {
 
 /** returns html markup for details on demand, based on user input */
 function getDetails(zip) {
-	var text = "<span class='label'>Zip Code: </span><span class='value'>" + "0" + zip + " ( " + getZipName(zip) + " )" + "</span>";
+	var text = "<span class='label'>Zip Code: </span><span class='value'>" + "0" + zip + " (" + getZipName(zip) + ")" + "</span>";
 	if(document.getElementById("count").checked) {
 		var num_listings = text + "<br />" + "<span class='label'>Number of listings:</span> " + "<span class='value'>" + counts[zip] + "</span>";
 		return num_listings;
@@ -320,12 +341,48 @@ function clearPolygons() {
 
 /** loads all of our content from 2 csv files */
 function initialize() {
-	colors.push("#FEEBE2");
+
+/* GRAY
+    colors.push("#EEEEEE");
+    colors.push("#CCCCCC");
+    colors.push("#AAAAAA");
+    colors.push("#777777");
+    colors.push("#444444");
+
+/* PURPLE
+    colors.push("#BCBDDC");
+    colors.push("#9E9AC8");
+    colors.push("#807DBA");
+    colors.push("#6A51A3");
+    colors.push("#4A1486");
+
+/* GREEN */
+    colors.push("#F5F5F5");
+    colors.push("#C7EAE5");
+    colors.push("#80CDC1");
+    colors.push("#35978F");
+    colors.push("#01665E");
+
+/* BLUE 
+    colors.push("#9ECAE1");
+    colors.push("#6BAED6");
+    colors.push("#4292C6");
+    colors.push("#2171B5");
+    colors.push("#004090");
+    
+/*  ORANGE 
+	colors.push("#FEE391");
+	colors.push("#FEC44F");
+	colors.push("#FE9929");
+	colors.push("#CC4C02");
+	colors.push("#8C2D04");
+/*  PINKISH
+    colors.push("#FEEBE2");
 	colors.push("#FBB4B9");
 	colors.push("#F768A1");
 	colors.push("#C51B8A");
 	colors.push("#7A0177");
-
+*/
 	d3.csv("data/boston_for_sale.csv", function(d) {
 		// populate "homes for sale" array
 		data_for_sale = d;
@@ -333,8 +390,7 @@ function initialize() {
         // create initial scatterplot
         createPricePerSqFtScatterplot(data_for_sale);
 		
-		// load initial listings on scatterplot
-		updateChartData(selected_array);
+        initBarChart(data_for_sale);
 	});
 
 	
@@ -348,8 +404,8 @@ function initialize() {
 
 		// populate "homes sold" array
 		data_sold = d;
-
-		// calls all filters to be applied to newly created map
+        
+        // calls all filters to be applied to newly created map
 		filter(1); 		
 	
 		// calls for map to be drawn, since this is our default option
@@ -460,67 +516,194 @@ function loadBuckets(d,beds,baths,min_sqft,max_sqft,min_year,max_year,min_price,
 	}
 }
 
-/** creates a bullet graph of actual versus project price based on selected zip code */
-function bulletGraph(zip) {
-	// remove the "actual" bar
-	d3.select(".actual").remove();
-	// remove the "zestimate" bar
-	d3.select(".zestimate").remove();
-	// remove the "max" bar
-	d3.select(".max").remove();
-	// scale our range to maximum price of selected zip, and the range to the width of the bullet graph
-	var scale =	d3.scale.linear().domain([0,d3.max(maxes,function(d){return d})]).range([0,250]);
-	// scale actual price amount
-	price = scale(parseInt(parseInt(prices[zip])/parseInt(counts[zip])));
-	// scale max value per selected zip
-	max = scale(parseInt(maxes[zip]));
-	// scale zestimate amount
-	zestimate = scale(parseInt(parseInt(zestimates[zip])/parseInt(counts[zip])));
-	// price data array to be passed to d3
-	price = [price];
-	// zestimate data array to be passed to d3
-	zestimate = [zestimate];
-	// max data array to be passed to d3
-	max = [max];
-	
-	// add animated bars to bullet graph with set parameters
-    d3.select("#bullet").selectAll("div").data(price).enter().append("div")
-        .attr("class","actual")
-        .style("top","0px")
-        .transition().duration(600)
+function initBarChart() {
+
+    $("#bar").html("");
+	selected = "";    
+    if (document.getElementById("forsale").checked == true) {
+		selected = "for_sale";
+	} else if (document.getElementById("sold").checked == true) {
+		selected = "sold";
+	}
+    // average actual price for boston
+	avg_actual_all = getForSaleStats(selected)[1];
+	// average zestimate price for boston
+	avg_zestimate_all = getForSaleStats(selected)[2];
+
+	document.getElementById("detailsBoston").innerHTML = "<span class='label'>Average Price (Boston):</span><br/><span class='valueBoston'>$"+withCommas(avg_actual_all)+"</span>";
+
+   	// scale our range to maximum price of boston, and the range of the height of the bar chart
+	currentMaxBarHeight = d3.max([avg_actual_all,avg_zestimate_all]);
+    var scale =	d3.scale.linear().domain([0,currentMaxBarHeight]).range([0,210]);
+    
+    var bars = d3.select("#bar").selectAll("div").data([scale(avg_actual_all)]);
+    bars.enter().append("div")
+        .attr("class","avg_boston")
+		.style("top","223px")
+        .transition().duration(700)
             .style("height",function(d){return d+"px"})
-            .style("top",function(d) {return "-"+d+"px"})
-            .text("actual avg")
-            .attr("onmousemove",function(d) {return "tooltip.show('Average Price: $" + withCommas(Math.round(prices[zip]/parseInt(counts[zip])))+"');"})
+            .style("top",function(d) {return parseInt(220-d)+"px"})
+            .attr("onmousemove",function(d) {return "tooltip.show('Average Price (Boston):<br/> $" + withCommas(avg_actual_all)+"');"})
+            .attr("onmouseout","tooltip.hide();");
+			
+    d3.select("#bar").data([scale(avg_zestimate_all)]).append("div")
+        .attr("class","avg_zestimate")
+		.style("top","223px")
+        .transition().duration(800)
+            .style("height",function(d){return d+"px"})
+            .style("top",function(d) {return parseInt(220-d)+"px"})
+            .attr("onmousemove",function(d) {return "tooltip.show('Average Zestimate (Boston):<br/> $" + withCommas(avg_zestimate_all)+"');"})
             .attr("onmouseout","tooltip.hide();");
     
-    d3.select("#bullet").data(zestimate).append("div")
-        .attr("class","zestimate")
-        .transition().duration(1000)
-            .style("height",function(d){return d+"px"})
-            .style("top",function(d) {return "-"+d+"px"})
-            .text("zestimate avg")
-            .attr("onmousemove",function(d) {return "tooltip.show('Average Zestimate: $" + withCommas(Math.round(zestimates[zip]/parseInt(counts[zip])))+"');"})
-            .attr("onmouseout","tooltip.hide();");
-            
-	d3.select("#bullet").data(max).append("div")
-        .attr("class","max")
-        .transition().duration(1300)
-            .style("height",function(d){return d+"px"})
-            .style("top",function(d) {return "-"+d+"px"})
-            .text("max")
-            .attr("onmousemove",function(d) {return "tooltip.show('Max Price: $" + withCommas(Math.round(maxes[zip]))+"');"})
-            .attr("onmouseout","tooltip.hide();");
+    currentMaxBar = d3.select("#bar")
+        .append("div");
+    currentMaxBar
+        .attr("id","currentMaxBar")
+        .style("top","220px")
+        .transition().duration(700)
+            .style("top","-9px");
+    d3.select("#currentMaxBar").append("span")
+                .style("opacity","0.6")
+                .style("background","white")
+                .text("$" + withCommas(scale.domain()[1]));
 }
+
+/** creates a bar chart of actual versus project price based on selected zip code */
+function barChart(zip) {
+
+	// clear bart chart
+	$("#bar").html("");
+	selected = "";
+	
+	if (document.getElementById("forsale").checked == true) {
+		selected = "for_sale";
+	} else if (document.getElementById("sold").checked == true) {
+		selected = "sold";
+	}
+	
+
+	// scale actual price amount
+	price = parseInt(parseInt(prices[zip])/parseInt(counts[zip]));
+
+	// scale zestimate amount
+	zestimate = parseInt(parseInt(zestimates[zip])/parseInt(counts[zip]));
+	// price data array to be passed to d3
+	//price = [price];
+	// zestimate data array to be passed to d3
+	//zestimate = [zestimate];
+	
+	// average actual price for boston
+	avg_actual_all = getForSaleStats(selected)[1];
+	
+	// average zestimate price for boston
+	avg_zestimate_all = getForSaleStats(selected)[2];
+
+   	// scale our range to maximum price of boston, and the range of the height of the bar chart
+	currentMaxBarHeight = d3.max([price,zestimate,avg_actual_all,avg_zestimate_all]);
+    var scale =	d3.scale.linear().domain([0,currentMaxBarHeight]).range([0,210]);	
+    
+    d3.select("#bar").selectAll("div").data([scale(avg_actual_all)]).enter().append("div")
+        .attr("class","avg_boston")
+		.style("top","223px")
+        .transition().duration(700)
+            .style("height",function(d){return d+"px"})
+            .style("top",function(d) {return parseInt(220-d)+"px"})
+            .attr("onmousemove",function(d) {return "tooltip.show('Average Price (Boston):<br/> $" + withCommas(avg_actual_all)+"');"})
+            .attr("onmouseout","tooltip.hide();");
+			
+    d3.select("#bar").data([scale(price)]).append("div")
+        .attr("class","avg_zip")
+		.style("top","223px")
+        .transition().duration(700)
+            .style("height",function(d){return d+"px"})
+            .style("top",function(d) {return parseInt(220-d)+"px"})
+            .attr("onmousemove",function(d) {return "tooltip.show('Average Price (0" + zip + "):<br/> $" + withCommas(price)+"');"})
+            .attr("onmouseout","tooltip.hide();");
+			
+    d3.select("#bar").data([scale(avg_zestimate_all)]).append("div")
+        .attr("class","avg_zestimate")
+		.style("top","223px")
+        .transition().duration(800)
+            .style("height",function(d){return d+"px"})
+            .style("top",function(d) {return parseInt(220-d)+"px"})
+            .attr("onmousemove",function(d) {return "tooltip.show('Average Zestimate (Boston):<br/> $" + withCommas(avg_zestimate_all)+"');"})
+            .attr("onmouseout","tooltip.hide();");
+			
+    d3.select("#bar").data([scale(zestimate)]).append("div")
+        .attr("class","avg_zestimate_zip")
+		.style("top","223px")
+        .transition().duration(900)
+            .style("height",function(d){return d+"px"})
+            .style("top",function(d) {return parseInt(220-d)+"px"})
+            .attr("onmousemove",function(d) {return "tooltip.show('Average Zestimate (0" + zip + "):<br/> $" + withCommas(zestimate)+"');"})
+            .attr("onmouseout","tooltip.hide();");
+	
+    //d3.select("#bar_help").text("");
+    
+    currentMaxBar = d3.select("#bar")
+        .append("div");
+    currentMaxBar
+        .attr("id","currentMaxBar")
+        .style("top","220px")
+        .transition().duration(700)
+            .style("top","-9px");
+    d3.select("#currentMaxBar").append("span")
+                .style("opacity","0.6")
+                .style("background","white")
+                .text("$" + withCommas(scale.domain()[1]));
+                
+	// show bar labels
+	//$("#bar_help").show();
+}
+
+/** returns an array of max, actual average, and zestimate for the listings of boston */
+function getForSaleStats(type) {
+	var max = 0;
+	var price_sum = 0;
+	var zestimate_sum = 0;
+	var average_price = 0;
+	var average_zestimate = 0;
+	var selected = "";
+	var stats = new Array();
+	
+	if (type == "for_sale") {
+		selected = data_for_sale; 
+	} else if (type == "sold") {
+		selected = data_sold;
+	}
+
+	var count = selected.length;
+    
+	for (var i in selected) {
+		if(parseInt(selected[i].price) >= max) {
+			max = parseInt(selected[i].price);
+		}
+		price_sum += parseInt(selected[i].price);
+		zestimate_sum += parseInt(selected[i].zestimate);
+	}
+	
+	average_price = parseInt(price_sum/count);
+	average_zestimate = parseInt(zestimate_sum/count);
+	
+	stats.push(max);
+	stats.push(average_price);
+	stats.push(average_zestimate);
+	
+	return stats;
+}
+
 
 /** creates the price-per-foot scatterplot  */
 function createPricePerSqFtScatterplot(data_in) {
         var margin = {top: 20, right: 20, bottom: 40, left: 100},
-            width = 450 - margin.left - margin.right,
+            width = 500 - margin.left - margin.right,
             height = 300 - margin.top - margin.bottom;
 
 		// create an svg object with width and height
-		var svg = d3.select("body").select("#pricePerSqFt").append("svg")
+		var svgDiv = d3.select("body").select("#pricePerSqFt");
+        svgDiv
+            .select("svg").remove();
+        var svg = svgDiv.append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("id","svgScatter")
             .attr("height", height + margin.top + margin.bottom)
@@ -562,11 +745,6 @@ function createPricePerSqFtScatterplot(data_in) {
 
 		svg.append("g")
               .attr("class", "x axis")
-              .on("mousedown", function(d) {
-                var p = d3.mouse(svg[0][0]);
-                downx = xScale.invert(p[0]);
-                downscalex = xScale;
-                })
               .attr("transform", "translate(0," + height + ")")
               .call(xAxis)
             .append("text")
@@ -584,19 +762,6 @@ function createPricePerSqFtScatterplot(data_in) {
               .style("text-anchor", "end")
               .text("Price ($)");
         
-        d3.select('body')
-            .on("mousemove", function(d) {
-              if (!isNaN(downx)) {
-                var p = d3.mouse(svg[0][0]), rupx = p[0];
-                if (rupx != 0) {
-                    xScale.domain([downscalex.domain()[0],  width * (downx - downscalex.domain()[0]) / rupx + downscalex.domain()[0]]);
-                }
-                updateChartScale(data_in);
-              }
-            })
-            .on("mouseup",function(d) { downx=Math.NaN;});
-
-        
         circles
             //tooltip code from: sixrevisions.com 
             .attr("onmousemove",function(d) {return "tooltip.show('" + listingToDetailsString(d)+"');"})
@@ -608,10 +773,11 @@ function createPricePerSqFtScatterplot(data_in) {
                 return yScale(parseInt(d.price));			
             })
 			// radius of the circles
-            .attr("r","1")
+            .attr("r","4")
+            .attr("fill-opacity","0.4")
 			// fill color of the circles
-            .attr("stroke","lightgray")
-            .attr("fill","gray");
+            .attr("stroke","#01665E")
+            .attr("fill","#80CDC1");
 }
 
 function updateChartScale(dataIn) {
@@ -625,8 +791,7 @@ function updateChartScale(dataIn) {
         .data(dataIn)
         .transition()
             .attr("cx",function(d) {return xScale(parseInt(d.sqft))})
-            .attr("cy",function(d) {return yScale(parseInt(d.price))})
-            .attr("r","2");
+            .attr("cy",function(d) {return yScale(parseInt(d.price))});
             
     
     // now set all slider values to match the updated scatterplot ranges
@@ -668,26 +833,22 @@ function updateChartData(dataIn) {
 
     var xScale = d3.scale.linear()
         .domain(xDomain)
-        .range([0,330]);
+        .range([0,380]);
     var yScale = d3.scale.linear()
         .domain(yDomain)
         .range([0,240]);
     
    var svg = d3.select("body").select("#pricePerSqFt").selectAll("circle")
-        .data(dataIn)
-
+        .data(dataIn).each(function(d) {
+        d3.select(this)
         .transition().duration(1000)
         //tooltip code from: sixrevisions.com 
-            .attr("onmousemove",function(d) {return "tooltip.show('" + listingToDetailsString(d)+"');"})
+            .attr("onmousemove","tooltip.show('" + listingToDetailsString(d)+"');")
             .attr("onmouseout","tooltip.hide();")
-            .attr("cx",function(d) {
-                return xScale(d.sqft);
-            })
-		    .attr("cy",function(d) { 
-                return yScale(d.price);			
-            })
+            .attr("cx",xScale(d.sqft))
+		    .attr("cy",yScale(d.price))
             .attr("visibility", function(d) {return d.price > minPrice && d.price < maxPrice && d.sqft > minSqFt && d.sqft < maxSqFt && bedrooms.indexOf(String(d.beds))>=0 && baths.indexOf(String(d.baths))>=0  ? "visible" : "hidden"});
-            
+        });
     d3.select("#pricePerSqFt").select("g.x.axis")
         .transition().duration(1000)
             .call(d3.svg.axis().scale(xScale).orient("bottom").ticks(5));
@@ -698,14 +859,28 @@ function updateChartData(dataIn) {
 
 /** applies style to scatterplot circles that pertain to selected zip code */
 function updateChartZip(zip) {
-   var svg = d3.select("body").select("#pricePerSqFt").selectAll("circle")
-        .attr("stroke", function(d) {
-                return d.zip == zip ? "blue" : "lightgray"})
-         .attr("fill", function(d) {
-                return d.zip == zip ? "white" : "lightgray"})               
-        .transition().duration()
-            .attr("r", function(d) {
-                return d.zip == zip ? 2 : 1});
+    
+   var svgPlot = d3.select("body").select("#pricePerSqFt").selectAll("circle")
+    .each(function(d) {
+        if (d.zip == zip) {
+            this.parentNode.appendChild(this);
+            d3.select(this)                
+                .attr("stroke", "black")
+                .attr("fill", "#BF812D")
+                .attr("fill-opacity","0.7")
+                .transition().duration()
+                    .attr("r", "5");
+        }
+        else {
+            d3.select(this)
+            .attr("stroke","#01665E")
+            .attr("fill","#80CDC1")            
+            .attr("fill-opacity","0.2")
+            .attr("stroke-opacity","0.5")
+            .transition().duration()
+                    .attr("r", "4");
+        }
+    });
 }
 
 function createTimeline(zipcode) {
@@ -737,7 +912,7 @@ function createTimeline(zipcode) {
 	}
 
     var beginDate = new Date("2010 12 31");
-    var endDate = new Date("2013 04 22");
+    var endDate = new Date("2013 04 20");
     
     //filter timeline by the criteria given
     var i = 0;
@@ -758,7 +933,7 @@ function createTimeline(zipcode) {
                     j++;
                 }            
     });
-            
+    
     // initialize our range of dates, scales, and define that we want weeks 
     var dateRange = [beginDate,endDate];
     var binner = d3.time.scale();
@@ -775,13 +950,17 @@ function createTimeline(zipcode) {
 
     // create a blank histogram
     var hist=[];
-    for(var i=0;i<allIntervals.length;i++) hist[i] = new Array(2);
+    for(var i=0;i<allIntervals.length;i++) hist[i] = new Array(3);
     for(var i=0;i<allIntervals.length;i++) hist[i][0] = 0;
+    for(var i=0;i<allIntervals.length;i++) hist[i][2] = 0;
 
     // create a blank histogram for the Zipcode
     var histZip=[];
-    for(var i=0;i<allIntervals.length;i++) histZip[i] = new Array(2);
+    for(var i=0;i<allIntervals.length;i++) histZip[i] = new Array(3);
     for(var i=0;i<allIntervals.length;i++) histZip[i][0] = 0;
+    
+    var j=new Array(filteredSoldListings.length);
+    for(var i=0;i<j.length;i++) j[i] = 0;
     
     // then populate the histogram
     filteredSoldListings.forEach(function(d) {
@@ -789,9 +968,17 @@ function createTimeline(zipcode) {
         if (!hist[tid][0]) {
             hist[tid][0] = 1;
             hist[tid][1] = interval.floor(d.dateofsale);
+            hist[tid][2] = parseInt(d.price);
+            j[tid]=1;
         }
         else {
             hist[tid][0]++;
+
+            // get new average of prices for that date
+            //console.log(hist[tid][2] +","+ j[tid]+","+d.price);                
+            hist[tid][2] = hist[tid][2]*j[tid];
+            j[tid]++;
+            hist[tid][2] = Math.round((hist[tid][2]+parseInt(d.price))/j[tid]);
         }
     });
     
@@ -801,42 +988,83 @@ function createTimeline(zipcode) {
         if (!histZip[tid][0]) {
             histZip[tid][0] = 1;
             histZip[tid][1] = interval.floor(d.dateofsale);
+            histZip[tid][2] = parseInt(d.price);
+            j[tid]=1;
         }
         else {
             histZip[tid][0]++;
+            if (d.price>1) {
+                histZip[tid][2] = histZip[tid][2]*j[tid];
+                j[tid]++;
+                histZip[tid][2] = Math.round((histZip[tid][2]+parseInt(d.price))/j[tid]);
+            }
         }
     });
+    
+    var numberOfSales=1;
+    
+    // create the proportion lines
+    // first get the extent of the range and evenly divide it into 4 segments
+    d3.select("#timelineLabel").selectAll("div.chartjunkDiv")
+        .data([60,30])
+        .enter().append("div")
+            .attr("class", "chartjunkDiv")
+            .style("top",function(d) {return String(parseInt(92-d))+"px"})
+            .text(function(d) {return d});
     
     // first build/update the regular frequency chart
         d3.select("#timeline").selectAll("div.histDiv")
             .data(hist.slice(1))
             .enter().append("div")
+                .style("top","0px")
                 .attr("class","histDiv");
         d3.select("#timeline").selectAll("div.histDiv")
-            .attr("top","0px")
             .style("left",function(d,i) {return String(i*7)+"px"})
             .style("width","5px")
-            .attr("onmousemove",function(d,i) {return "this.style.top='-" + String(parseInt(d[0]+5)) + "px';tooltip.show('Week of: " + String(d[1]).substring(0,16) +"<br/>Listings sold: " + d[0]+ "');"})
-            .attr("onmouseout",function(d,i) {return "this.style.top='-" + String(parseInt(d[0])) + "px';tooltip.hide();"})
-            .html(function(d,i) {if (i%13==0) {
-                    return "<div class='dateLabel' style='top:"+ d[0] +"px;'>" + String(d[1]).substring(4,7) + String(d[1]).substring(10,16) + "</div>";
+            .attr("onmousemove",function(d,i) {
+                if (numberOfSales) {
+                    return "this.id='divHover';tooltip.show('Week of: " + String(d[1]).substring(4,16) +"<br/>" + d[0]+ " listings sold in Boston');"
+                } else {
+                    return "this.style.background='darkblue';tooltip.show('Week of: " + String(d[1]).substring(4,16) +"<br/>Average sale price: " + withCommas(d[2]) + "');"
+                }
+            })
+            .attr("onmouseout",function(d,i) {return "this.id='';tooltip.hide();"})
+            .html(function(d,i) {
+                    if (i%13==0) {
+                        if (numberOfSales) {
+                            return "<div class='dateLabel' style='top:"+ d[0] +"px;'>" + String(d[1]).substring(4,7) + String(d[1]).substring(10,16) + "</div>";
+                        } else {
+                            return "<div class='dateLabel' style='top:"+ Math.round(d[2]/10000) +"px;'>" + String(d[1]).substring(4,7) + String(d[1]).substring(10,16) + "</div>";                            
+                        }
                     }
                 })
             .transition().duration(1000)
-                .style("height",function(d) {return d[0] + "px"})
-                .style("top",function(d) {return "-" + String(parseInt(d[0])) + "px"});
+                .style("height",function(d) {
+                    if (numberOfSales) {
+                        return d[0] + "px";
+                    } else {
+                        return Math.round(d[2]/10000) + "px";
+                    }
+                })
+                .style("top",function(d) {
+                    if (numberOfSales) {
+                        return "-" + d[0] + "px"
+                    } else {
+                        return "-" + Math.round(d[2]/10000) + "px";
+                    }
+                });
 
     // then build/update the zipcode if it
         d3.select("#timeline").selectAll("div.zipdiv")
             .data(histZip.slice(1))
             .enter().append("div")
-            .attr("class","zipdiv");
+                .style("top","0px")
+                .attr("class","zipdiv");
         d3.select("#timeline").selectAll("div.zipdiv")
-            .attr("top","0px")
             .style("left",function(d,i) {return String(i*7)+"px"})
             .style("width","5px")
-            .style("z-index",function(d) {return d[0]>1 ? "10" : "-1"})
-            .attr("onmousemove",function(d) {return "tooltip.show('Week of: " + String(d[1]).substring(0,16) +"<br/>Listings sold: " + d[0]+ "');"})
+            .style("z-index",function(d) {return d[0]>1 ? "102" : "-1"})
+            .attr("onmousemove",function(d) {return "tooltip.show('Week of: " + String(d[1]).substring(4,16) +"<br/>" + d[0]+ " listings sold in 0"+zipcode+"');"})
             .attr("onmouseout","tooltip.hide();")
             .transition().duration(1000)
                 .style("height",function(d) {return d[0] + "px"})
@@ -936,6 +1164,23 @@ function toggleVideo() {
 function toggleDescription() {
 	$('#description_mask').toggle();
 }
+
+/* toggle controls 
+function toggleControls() {
+    if (document.getElementById('toggleControls').innerHTML=="&lt;") {
+        d3.select("#controls")
+            .transition().duration(500)
+                .style("left","600px");
+        document.getElementById('toggleControls').innerHTML="&gt;";
+    }
+    else {
+        d3.select("#controls")
+            .transition().duration(500)
+                .style("left","915px");
+        document.getElementById('toggleControls').innerHTML="&lt;";
+    }
+}*/
+
 
 /** initializes square foot slider. range is chosen arbitrarily */
 $(function() {
