@@ -159,7 +159,7 @@ function filter(changeChart) {
         createPricePerSqFtScatterplot(selected_array);
         updateChartData(selected_array);
     }
-    
+
     // now create the sales history frequency chart/timeline
     createTimeline(currentZip);
     
@@ -780,25 +780,6 @@ function createPricePerSqFtScatterplot(data_in) {
             .attr("fill","#80CDC1");
 }
 
-function updateChartScale(dataIn) {
-    var svg = d3.select("#pricePerSqFt").select("svg");
-    d3.select("#pricePerSqFt").select("g.x.axis")
-        .transition()
-            .call(d3.svg.axis().scale(xScale).orient("bottom").ticks(5));
-    
-    svg
-        .selectAll("circle")
-        .data(dataIn)
-        .transition()
-            .attr("cx",function(d) {return xScale(parseInt(d.sqft))})
-            .attr("cy",function(d) {return yScale(parseInt(d.price))});
-            
-    
-    // now set all slider values to match the updated scatterplot ranges
-    $("#slider-range-sqft").slider("values",0,xScale.domain()[0]);
-    $("#slider-range-sqft").slider("values",1,xScale.domain()[1]);
-}
-
 /** updates the chart given a selected data */
 function updateChartData(dataIn) {
 
@@ -839,7 +820,7 @@ function updateChartData(dataIn) {
         .range([0,240]);
     
    var svg = d3.select("body").select("#pricePerSqFt").selectAll("circle")
-        .data(dataIn).each(function(d) {
+        .each(function(d) {
         d3.select(this)
         .transition().duration(1000)
         //tooltip code from: sixrevisions.com 
@@ -1195,7 +1176,7 @@ $(function() {
 	  }
 	}).bind({
         slidestart : function(event,ui) {},
-        slidechange : function(event,ui) {$( "#amountSqft" ).val( ui.values[ 0 ] + " - " + ui.values[ 1 ]);filter(0)},
+        slidechange : function(event,ui) {$( "#amountSqft" ).val( ui.values[ 0 ] + " - " + ui.values[ 1 ]);filter(1)},
         slidestop : function(event,ui) {},
     });
 	$( "#amountSqft" ).val( $( "#slider-range-sqft" ).slider( "values", 0 ) +
@@ -1215,7 +1196,7 @@ $(function() {
 	  }
 	}).bind({
         slidestart : function(event,ui) {},
-        slidechange : function(event,ui) {$( "#amountPrice" ).val( ui.values[ 0 ] + " - " + ui.values[ 1 ]);filter(0)},
+        slidechange : function(event,ui) {$( "#amountPrice" ).val( ui.values[ 0 ] + " - " + ui.values[ 1 ]);filter(1)},
         slidestop : function(event,ui) {},
     });
 	$( "#amountPrice" ).val( "$" +  $("#slider-range-price" ).slider( "values", 0 ) +
